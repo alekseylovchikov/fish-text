@@ -1,46 +1,55 @@
+// DOM elements
 const outputArea = document.getElementById("output");
 const lastTextArea = document.getElementById("lastText");
 const numberInput = document.getElementById("numberInput");
+const getTextButton = document.getElementById("getTextButton");
+const copyTextButton = document.getElementById("copyTextButton");
+const copiedMessage = document.getElementById("copied");
+const addTimeButtons = document.querySelectorAll(".add-time");
 
-const lastText = localStorage.getItem("lastText");
-if (lastText) {
-  lastTextArea.innerText = "Показан последний загруженный текст";
-  outputArea.innerHTML = lastText;
+// Functions
+function displayLastText() {
+  const lastText = localStorage.getItem("lastText");
+  if (lastText) {
+    lastTextArea.innerText = "Показан последний загруженный текст";
+    outputArea.innerHTML = lastText;
+  }
 }
 
-document.querySelectorAll(".add-time").forEach((button) => {
-  button.addEventListener("click", () => {
-    const time = button.dataset.time;
-    if (time === "reset") {
-      numberInput.value = 1;
-      return;
-    }
-    const newTime = parseInt(numberInput.value) + parseInt(time);
-    numberInput.value = newTime;
-  });
-});
-
-document.getElementById("getTextButton").addEventListener("click", function () {
-  const number = document.getElementById("numberInput").value;
-  const button = this;
-
-  if (!number) {
-    alert("Пожалуйста, введите число.");
-    return;
+function updateNumberInput(time) {
+  if (time === "reset") {
+    numberInput.value = 1;
+  } else {
+    numberInput.value = parseInt(numberInput.value) + parseInt(time);
   }
+}
 
-  if (parseFloat(number) < 1) {
-    alert("Пожалуйста, введите число больше 0.");
-    return;
-  }
-
-  button.setAttribute("disabled", true);
-  button.innerText = "Загрузка...";
-
-  fetch(
+function fetchText(number) {
+  return fetch(
     `https://fish-text.ru/get?format=html&type=sentence&number=${number}.00&self=true`
-  )
-    .then((response) => response.text())
+  ).then((response) => response.text());
+}
+
+function updateButtonState(button, isLoading) {
+  button.disabled = isLoading;
+  button.innerText = isLoading ? "Загрузка..." : "Получить текст";
+}
+
+function handleGetTextClick() {
+  const number = numberInput.value;
+
+  if (!number || parseFloat(number) < 1) {
+    alert(
+      number
+        ? "Пожалуйста, введите число больше 0."
+        : "Пожалуйста, введите число."
+    );
+    return;
+  }
+
+  updateButtonState(getTextButton, true);
+
+  fetchText(number)
     .then((data) => {
       outputArea.innerHTML = data;
       lastTextArea.innerText = "";
@@ -50,37 +59,45 @@ document.getElementById("getTextButton").addEventListener("click", function () {
       outputArea.textContent = "Ошибка при получении текста";
       console.error("Ошибка:", error);
     })
-    .finally(() => {
-      button.removeAttribute("disabled");
-      button.innerText = "Получить текст";
-    });
-});
+    .finally(() => updateButtonState(getTextButton, false));
+}
 
-document.getElementById("copyTextButton").addEventListener("click", () => {
+function copyToClipboard(text) {
+  return navigator.clipboard.writeText(text);
+}
+
+function showCopiedMessage() {
+  copiedMessage.innerText = "Текст скопирован в буфер обмена!";
+  setTimeout(() => {
+    copiedMessage.innerText = "";
+  }, 3000);
+}
+
+function handleCopyTextClick() {
   const textToCopy = outputArea.textContent;
 
-  let timeoutId;
-
-  if (timeoutId) {
-    clearTimeout(timeoutId);
-  }
-
-  if (textToCopy) {
-    navigator.clipboard
-      .writeText(textToCopy)
-      .then(() => {
-        document.getElementById("copied").innerText =
-          "Текст скопирован в буфер обмена!";
-
-        timeoutId = setTimeout(() => {
-          document.getElementById("copied").innerText = "";
-        }, 3000);
-      })
-      .catch((err) => {
-        alert("Не удалось скопировать текст");
-        console.error("Ошибка копирования:", err);
-      });
-  } else {
+  if (!textToCopy) {
     alert("Нет текста для копирования!");
+    return;
   }
+
+  copyToClipboard(textToCopy)
+    .then(showCopiedMessage)
+    .catch((err) => {
+      alert("Не удалось скопировать текст");
+      console.error("Ошибка копирования:", err);
+    });
+}
+
+// Event listeners
+addTimeButtons.forEach((button) => {
+  button.addEventListener("click", () =>
+    updateNumberInput(button.dataset.time)
+  );
 });
+
+getTextButton.addEventListener("click", handleGetTextClick);
+copyTextButton.addEventListener("click", handleCopyTextClick);
+
+// Initialize
+displayLastText();
