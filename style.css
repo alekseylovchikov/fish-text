@@ -26,7 +26,7 @@ body {
   border: 1px dashed #ddd;
   border-radius: 3px;
   padding: 8px;
-  max-height: 240px;
+  max-height: 200px;
   overflow-y: auto;
 }
 
