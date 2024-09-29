@@ -11,7 +11,6 @@ This Chrome extension allows users to generate "рыба текст" (placeholde
 - Quick buttons to adjust sentence count
 - Copy generated text to clipboard
 - Save and display the last generated text
-- Warning for potential VPN-related issues
 
 This extension is perfect for designers, developers, and content creators who need quick access to Russian placeholder text for their projects.
 
@@ -26,6 +25,5 @@ This extension is perfect for designers, developers, and content creators who ne
 - Быстрые кнопки для корректировки счета предложений
 - Копирование сгенерированного текста в буфер обмена
 - Сохранение и отображение последнего сгенерированного текста
-- Предупреждение о потенциальных проблемах с VPN
 
 Этот расширение идеально подходит для дизайнеров, разработчиков и создателей контента, которым требуется быстрый доступ к заместительному тексту на русском языке для их проектов.
